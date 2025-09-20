@@ -13,7 +13,8 @@ const Sign_Message = () => {
     const signature = await signMessage(encodedMessage);
     if (!ed25519.verify(signature, encodedMessage, publicKey.toBytes()))
       throw new Error("Messages signature invalid ");
-    alert("success", `message signature:${bs58.encode(signature)}`);
+    alert("successssss");
+    console.log(`message signature:  ${bs58.encode(signature)}`);
   }
   return (
     <div>

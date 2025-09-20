@@ -13,6 +13,7 @@ const Request_airdrop = () => {
     <div>
       <input type="number" id="amount" placeholder="Enter the amount" />
       <button onClick={RequestAirdrop}>Request_airdrop</button>
+      
     </div>
   );
 };

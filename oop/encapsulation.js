@@ -16,8 +16,8 @@ function createUser(first_name, last_name, age) {
       return new Date().getFullYear() - user.age;
     },
   };
-  console.log(user.get_age_year());
+  // console.log(user.get_age_year());
   return user;
 }
 const user1 = createUser("ankit", "singh", "23");
-console.log(user1);
+console.log(user1.get_age_year());

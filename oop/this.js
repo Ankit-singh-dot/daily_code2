@@ -21,12 +21,12 @@
 
 //  jbb new use krte hai tbb new keyword by-default object return krta hai no matter what this is
 
-function createUser(first_name, last_name, age) {
+function CreateUser(first_name, last_name, age) {
   this.first_name = first_name;
   this.last_name = last_name;
   this.age = age;
 }
-createUser.prototype.getAgeYear = function () {
+CreateUser.prototype.getAgeYear = function () {
   return new Date().getFullYear() - this.age;
 };
-const user1 = new createUser("Ankit", "singh", 24);
+const user1 = new CreateUser("Ankit", "singh", 24);

@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=La+Belle+Aurore&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .buttonFlow {
+    color: #08fdd8;
+    border: 1px solid #08fdd8;
+    height: 3rem;
+    width: 15rem;
+    letter-spacing: 0.3rem;
+    font-size: 16px;
+    background: linear-gradient(
+      to right,
+      #08fdd8 50%,
+      rgba(255, 255, 255, 0) 50%
+    );
+    background-size: 200% 100%;
+    background-position: right;
+    transition: all 0.2s ease;
+  }
+  .buttonFlow:hover {
+    background-position: left;
+    color: black;
+  }
+  @media (max-width: 640px) {
+    .buttonFlow {
+      height: 2.5rem;
+      width: 12rem;
+      letter-spacing: 0.2rem;
+      font-size: 14px;
+    }
+  }
+}

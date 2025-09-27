@@ -1,0 +1,13 @@
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: "Nunito Sans", "sans-serif";
+}
+
+h6 {
+  --tw-text-opacity: 1;
+  color: #515152;
+  font-family: "La Belle Aurore", cursive;
+  font-size: 1.2rem;
+}

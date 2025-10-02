@@ -1,0 +1,3 @@
+gstin,http_status,response_snippet
+27AAACT2727Q1ZW,200,"{""status"": ""success"", ""results"": [{""input"": ""27AAACT2727Q1ZW"", ""valid"": true, ""legal_name"": ""TATA MOTORS LIMITED""}], ""num_errors"": 0, ""total_count"": 1, ""total_cost"": 0, ""balance"": 0, ""hasSubscription"": false, ""hasUnlimitedConversion"": false}"
+29AACCW9827A1Z5,200,"{""status"": ""success"", ""results"": [{""input"": ""29AACCW9827A1Z5"", ""valid"": true, ""legal_name"": ""WEALIDES FINTECH PRIVATE LIMITED""}], ""num_errors"": 0, ""total_count"": 1, ""total_cost"": 0, ""balance"": 0, ""hasSubscription"": false, ""hasUnlimitedConversion"": false}"

@@ -4,6 +4,7 @@ import {
   useConnect,
   useConnectors,
   useDisconnect,
+  useReadContract,
   WagmiProvider,
 } from "wagmi";
 import { config } from "./config";
@@ -16,6 +17,7 @@ function App() {
       <QueryClientProvider client={client}>
         <TextLoop fontSize={"text-base md:text-lg"} fontWeight={"font-bold"} />
         <ConnectWallet />
+        <TotalSupply />
       </QueryClientProvider>
     </WagmiProvider>
   );
@@ -54,4 +56,29 @@ function ConnectWallet() {
     </div>
   );
 }
+function TotalSupply() {
+  const { data, isLoading, error } = useReadContract({
+    address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    abi: [
+      {
+        // here this is oonly contracting with this data only totalsuply rn we care not calling the other USDT_abi.ts
+        constant: true,
+        inputs: [],
+        name: "totalSupply",
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+          },
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function",
+      },
+    ],
+    functionName: "totalSupply",
+  });
+  return <div>Total supply is {data?.toString()}</div>;
+}
 export default App;
+// to interact with smart_contract we have to use ABI=application binary interface

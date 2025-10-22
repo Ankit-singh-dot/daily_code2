@@ -57,27 +57,25 @@ function ConnectWallet() {
   );
 }
 function TotalSupply() {
+  const { address } = useAccount();
   const { data, isLoading, error } = useReadContract({
     address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    // here this is oonly contracting with this data only totalsuply rn we care not calling the other USDT_abi.ts
     abi: [
       {
-        // here this is oonly contracting with this data only totalsuply rn we care not calling the other USDT_abi.ts
         constant: true,
-        inputs: [],
-        name: "totalSupply",
-        outputs: [
-          {
-            name: "",
-            type: "uint256",
-          },
-        ],
+        inputs: [{ name: "who", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "", type: "uint256" }],
         payable: false,
         stateMutability: "view",
         type: "function",
       },
     ],
-    functionName: "totalSupply",
+    functionName: "balanceOf",
+    args: ["0x2FB74a1Aba743c5fFa43A803F1b0c3e0CD6Ff7C8"],
   });
+  console.log(data);
   return <div>Total supply is {data?.toString()}</div>;
 }
 export default App;

@@ -1,5 +1,11 @@
 import "./App.css";
-import { useAccount, useConnectors, useDisconnect, WagmiProvider } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useConnectors,
+  useDisconnect,
+  WagmiProvider,
+} from "wagmi";
 import { config } from "./config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import TextLoop from "./Text_pop";
@@ -17,7 +23,8 @@ function App() {
 function ConnectWallet() {
   const connector = useConnectors();
   const { address } = useAccount();
-  const disconnect = useDisconnect();
+  const { disconnect } = useDisconnect();
+  const { connect } = useConnect();
   if (address) {
     return (
       <div>
@@ -34,8 +41,15 @@ function ConnectWallet() {
   }
   return (
     <div>
-      {connector.map((c) => (
-        <button key={c.id || c.name}>Connect via {c.name}</button>
+      {connector.map((connector) => (
+        <button
+          onClick={() => {
+            connect({ connector: connector });
+          }}
+          key={connector.id || connector.name}
+        >
+          Connect via {connector.name}
+        </button>
       ))}
     </div>
   );

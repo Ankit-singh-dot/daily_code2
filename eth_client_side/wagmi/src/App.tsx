@@ -10,6 +10,7 @@ import {
 import { config } from "./config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import TextLoop from "./Text_pop";
+import { AllowUSDT } from "./AllowUSDT";
 const client = new QueryClient();
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <TextLoop fontSize={"text-base md:text-lg"} fontWeight={"font-bold"} />
         <ConnectWallet />
         <Account />
+        <AllowUSDT />
         <TotalSupply />
       </QueryClientProvider>
     </WagmiProvider>

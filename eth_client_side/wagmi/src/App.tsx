@@ -17,9 +17,18 @@ function App() {
       <QueryClientProvider client={client}>
         <TextLoop fontSize={"text-base md:text-lg"} fontWeight={"font-bold"} />
         <ConnectWallet />
+        <Account />
         <TotalSupply />
       </QueryClientProvider>
     </WagmiProvider>
+  );
+}
+function Account() {
+  const { address } = useAccount();
+  return (
+    <div>
+      {address ? "you are connected" + address : "you are not connected"}
+    </div>
   );
 }
 function ConnectWallet() {

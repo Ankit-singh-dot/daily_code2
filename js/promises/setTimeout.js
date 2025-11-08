@@ -8,3 +8,5 @@ function setTimeoutPromisified(delay) {
 setTimeoutPromisified(3000).then(() => {
   console.log("3 second have been passed ");
 });
+
+// setTimeout(function, delay )

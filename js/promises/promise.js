@@ -15,3 +15,6 @@ class Rectangle {
 const shape = new Rectangle(2, 4);
 const area = shape.area();
 console.log(area);
+
+
+// a promise in js is an object that represent the eventual completion (of failure ) of an asynchronous operation and it's resulting value 

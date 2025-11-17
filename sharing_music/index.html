@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Control Panel 🎵</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .pause-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .stop-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 15px;
+            background: #2196F3;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .client-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        audio {
+            width: 100%;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 DJ Control Panel</h1>
+
+        <div class="status">
+            <p>Connected Clients: <span class="client-count" id="clientCount">0</span></p>
+            <p id="statusText">Ready to start party! 🎉</p>
+        </div>
+
+        <div class="controls">
+            <label for="audioFile" class="file-label">
+                📁 Select Music File
+            </label>
+            <input type="file" id="audioFile" accept="audio/*">
+
+            <p id="fileName" style="text-align: center; margin: 10px 0; color: #666;"></p>
+
+            <button class="play-btn" id="playBtn" disabled>▶️ Play for Everyone</button>
+            <button class="pause-btn" id="pauseBtn" disabled>⏸️ Pause</button>
+            <button class="stop-btn" id="stopBtn" disabled>⏹️ Stop</button>
+        </div>
+
+        <audio id="audioPlayer" controls></audio>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
+            <strong>📱 Share with friends:</strong>
+            <p id="shareUrl" style="word-break: break-all; margin-top: 5px;"></p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const audioPlayer = document.getElementById('audioPlayer');
+        const audioFile = document.getElementById('audioFile');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clientCount = document.getElementById('clientCount');
+        const statusText = document.getElementById('statusText');
+        const fileName = document.getElementById('fileName');
+        const shareUrl = document.getElementById('shareUrl');
+
+        let currentFilename = '';
+
+        // Display share URL
+        const url = window.location.origin + '/client.html';
+        shareUrl.textContent = url;
+
+        // File selection
+        audioFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                currentFilename = 'song.mp3'; // You'll need to upload this
+                fileName.textContent = `Selected: ${file.name}`;
+
+                // Create local URL for preview
+                const url = URL.createObjectURL(file);
+                audioPlayer.src = url;
+
+                playBtn.disabled = false;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+
+                statusText.textContent = 'Ready to play! 🎵';
+            }
+        });
+
+        // Play button
+        playBtn.addEventListener('click', () => {
+            if (!currentFilename) {
+                alert('Please select a music file first!');
+                return;
+            }
+
+            statusText.textContent = '▶️ Playing for everyone...';
+
+            socket.emit('startPlayback', {
+                filename: currentFilename,
+                timestamp: audioPlayer.currentTime
+            });
+        });
+
+        // Pause button
+        pauseBtn.addEventListener('click', () => {
+            statusText.textContent = '⏸️ Paused';
+            socket.emit('pausePlayback');
+        });
+
+        // Stop button
+        stopBtn.addEventListener('click', () => {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            statusText.textContent = '⏹️ Stopped';
+            socket.emit('pausePlayback');
+        });
+
+        // Listen for sync commands (DJ also follows them)
+        socket.on('syncPlay', (data) => {
+            const delay = data.startTime - Date.now();
+
+            if (delay > 0) {
+                statusText.textContent = `⏳ Starting in ${(delay / 1000).toFixed(1)}s...`;
+
+                setTimeout(() => {
+                    audioPlayer.src = data.audioUrl;
+                    audioPlayer.currentTime = data.timestamp;
+                    audioPlayer.play();
+                    statusText.textContent = '▶️ Playing!';
+                }, delay);
+            }
+        });
+
+        socket.on('syncPause', () => {
+            audioPlayer.pause();
+        });
+
+        // Update client count
+        socket.on('clientCount', (count) => {
+            clientCount.textContent = count;
+        });
+    </script>
+</body>
+
+</html>

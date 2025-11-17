@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Client 🎉</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            color: #f5576c;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+
+        .visualizer {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .volume-control {
+            margin: 20px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+
+        .join-btn {
+            width: 100%;
+            padding: 20px;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .join-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .join-btn:active {
+            transform: scale(0.95);
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎉 Party Mode</h1>
+
+        <!-- Join Button (shown first) -->
+        <div id="joinSection">
+            <div class="status">
+                Ready to join the party! 🎊
+            </div>
+            <button class="join-btn" id="joinBtn">🎵 Join Party</button>
+            <div class="info">
+                <strong>ℹ️ Tap "Join Party" to enable audio playback</strong><br>
+                (Required by browser policy)
+            </div>
+        </div>
+
+        <!-- Player Section (shown after joining) -->
+        <div id="playerSection" style="display: none;">
+            <div class="status" id="status">
+                Connecting to party...
+            </div>
+
+            <div class="visualizer" id="visualizer">
+                🎵
+            </div>
+
+            <div class="volume-control">
+                <label for="volume">Volume: <span id="volumeValue">100</span>%</label>
+                <input type="range" id="volume" min="0" max="100" value="100">
+            </div>
+
+            <audio id="audioPlayer"></audio>
+
+            <div class="info">
+                <strong>ℹ️ Info:</strong><br>
+                Connected clients: <span id="clientCount">0</span><br>
+                Audio will sync automatically when DJ plays!
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const audioPlayer = document.getElementById('audioPlayer');
+        const status = document.getElementById('status');
+        const volumeControl = document.getElementById('volume');
+        const volumeValue = document.getElementById('volumeValue');
+        const visualizer = document.getElementById('visualizer');
+        const clientCount = document.getElementById('clientCount');
+        const joinBtn = document.getElementById('joinBtn');
+        const joinSection = document.getElementById('joinSection');
+        const playerSection = document.getElementById('playerSection');
+
+        let hasUserInteraction = false;
+        let pendingPlayCommand = null;
+
+        // Join button - provides required user interaction
+        joinBtn.addEventListener('click', () => {
+            hasUserInteraction = true;
+            joinSection.style.display = 'none';
+            playerSection.style.display = 'block';
+            status.textContent = '✅ Connected! Waiting for music...';
+
+            // If there's a pending play command, execute it now
+            if (pendingPlayCommand) {
+                executePlayCommand(pendingPlayCommand);
+                pendingPlayCommand = null;
+            }
+        });
+
+        // Connection established
+        socket.on('connect', () => {
+            if (hasUserInteraction) {
+                status.textContent = '✅ Connected! Waiting for music...';
+                status.style.background = '#d4edda';
+            }
+        });
+
+        // Function to execute play command
+        function executePlayCommand(data) {
+            const delay = data.startTime - Date.now();
+
+            if (delay > 0) {
+                status.textContent = `⏳ Starting in ${(delay / 1000).toFixed(1)}s...`;
+
+                setTimeout(() => {
+                    audioPlayer.src = data.audioUrl;
+                    audioPlayer.currentTime = data.timestamp;
+
+                    // Play with error handling
+                    const playPromise = audioPlayer.play();
+
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            status.textContent = '🎵 Playing!';
+                            animateVisualizer();
+                        }).catch(err => {
+                            status.textContent = '❌ Please tap screen to enable audio';
+                            status.style.background = '#fff3cd';
+                            console.error('Play error:', err);
+                        });
+                    }
+                }, delay);
+            }
+        }
+
+        // Sync play command
+        socket.on('syncPlay', (data) => {
+            if (!hasUserInteraction) {
+                // Store command to execute after user interaction
+                pendingPlayCommand = data;
+                status.textContent = '👆 Tap "Join Party" button to start!';
+                joinSection.style.display = 'block';
+                playerSection.style.display = 'none';
+            } else {
+                executePlayCommand(data);
+            }
+        });
+
+        // Sync pause
+        socket.on('syncPause', () => {
+            audioPlayer.pause();
+            status.textContent = '⏸️ Paused';
+            visualizer.textContent = '⏸️';
+        });
+
+        // Sync seek
+        socket.on('syncSeek', (data) => {
+            if (!hasUserInteraction) return;
+
+            const delay = data.startTime - Date.now();
+
+            if (delay > 0) {
+                setTimeout(() => {
+                    audioPlayer.currentTime = data.timestamp;
+                    audioPlayer.play().catch(err => {
+                        console.error('Seek play error:', err);
+                    });
+                }, delay);
+            }
+        });
+
+        // Volume control
+        volumeControl.addEventListener('input', (e) => {
+            const volume = e.target.value;
+            audioPlayer.volume = volume / 100;
+            volumeValue.textContent = volume;
+        });
+
+        // Update client count
+        socket.on('clientCount', (count) => {
+            clientCount.textContent = count;
+        });
+
+        // Simple visualizer animation
+        function animateVisualizer() {
+            if (!audioPlayer.paused) {
+                const emojis = ['🎵', '🎶', '🎸', '🎹', '🎤', '🎧'];
+                visualizer.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                setTimeout(animateVisualizer, 500);
+            }
+        }
+
+        // Handle disconnection
+        socket.on('disconnect', () => {
+            status.textContent = '❌ Disconnected from party';
+            status.style.background = '#f8d7da';
+        });
+    </script>
+</body>
+
+</html>

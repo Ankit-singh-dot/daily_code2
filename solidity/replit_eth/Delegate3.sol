@@ -8,9 +8,9 @@ contract StorageProxy{
         num =0 ;
         implementation = _implementation;
     }
-    function setNum (uint _num )public {
+    function SetNum (uint _num )public {
         (bool success,) =implementation.delegatecall(
-            abi.encodeWithSignature("setNum(256)", _num)
+            abi.encodeWithSignature("SetNum(uint256)", _num)
         );
         require(success,"Error while delegating call");
     }
@@ -22,14 +22,14 @@ contract StorageProxy{
 
 contract Implementation{
     uint public num;
-    function setNum(uint _num)public {
+    function SetNum(uint _num)public {
         num = _num*2;
     }
 }
 
 contract Implementation2{
     uint public  num;
-    function setNum(uint _num) public  {
+    function SetNum(uint _num) public  {
         num = _num*3;
     }
 }

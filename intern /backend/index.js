@@ -81,23 +81,54 @@
 //   console.log(`HTTP + WebSocket server running on port ${port}`);
 // });
 
-import bodyParser from "body-parser";
 import express from "express";
-import { Server, Socket } from "socket.io";
-const io = new Server();
+import bodyParser from "body-parser";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+
 const app = express();
+const server = http.createServer(app);
+
+// Express CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(bodyParser.json());
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
 const emailToSocketMapping = new Map();
-io.on("connection", (Socket) => {
-  Socket.on("join-room", (data) => {
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  socket.on("join-room", (data) => {
     const { roomId, emailId } = data;
-    console.log("user", emailId, "joined room ", roomId);
-    emailToSocketMapping.set(emailId, roomId);
-    Socket.join(roomId);
-    Socket.broadcast.to(roomId).emit("user-joined", { emailId });
+
+    console.log("user", emailId, "joined room", roomId);
+
+    emailToSocketMapping.set(emailId, socket.id);
+    socket.join(roomId);
+
+    socket.broadcast.to(roomId).emit("user-joined", { emailId });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
   });
 });
-app.listen(8000, () => {
-  console.log("running on the port 8000");
+
+server.listen(8001, () => {
+  console.log("Server running on port 8001");
 });
-io.listen(8001);

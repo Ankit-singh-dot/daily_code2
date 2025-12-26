@@ -1,59 +1,73 @@
-// import express from "express";
-// const app = express();
-// app.use(express.json());
-// const USERS = [];
-// console.log(USERS);
-// app.get("/", (req, res) => {
-//   res.send("API is working");
-// });
-// app.post("/signup", (req, res) => {
-//     console.log("BODY:", req.body);
-//   const { fullname, lastName, phoneNumber, password } = req.body;
-//   if (!fullname || !lastName || !phoneNumber || !password) {
-//     return res.status(400).json({
-//       message: "Missing required fields",
-//       success: false,
-//     });
-//   }
+import express from "express";
 
-//   const existingUser = USERS.find((user) => user.phoneNumber === phoneNumber);
-//   if (existingUser) {
-//     return res.status(409).json({
-//       message: "User already exists",
-//       success: false,
-//     });
-//   }
-//   const newUser = {
-//     id: USERS.length + 1,
-//     fullname,
-//     lastName,
-//     phoneNumber,
-//     password,
-//   };
+const app = express();
+app.use(express.json());
+app.get("/", (req, res) => {
+  res.send("api is working ");
+});
+const USERS = [];
+app.post("/signup", (req, res) => {
+  const { fullName, Password, phoneNumber } = req.body;
+  if (!fullName || !Password || !phoneNumber) {
+    return res.status(400).json({
+      message: "please send all the details ",
+      success: false,
+    });
+  }
+  const ExistingUser = USERS.find((user) => user.phoneNumber === phoneNumber);
+  if (ExistingUser) {
+    return res.status(409).json({
+      message: "user alreday exist ",
+      success: true,
+    });
+  }
+  const newUser = {
+    id: USERS.length + 1,
+    fullName,
+    Password,
+    phoneNumber,
+  };
+  USERS.push(newUser);
+  return res.status(201).json({
+    message: "user successfully created ",
+    success: true,
+  });
+});
 
-//   USERS.push(newUser);
-//   return res.status(201).json({
-//     message: "Account created successfully",
-//     success: true,
-//     user: {
-//       id: newUser.id,
-//       fullname,
-//       lastName,
-//       phoneNumber,
-//     },
-//   });
-// });
-
-// app.get("/users", (req, res) => {
-//   res.json({
-//     success: true,
-//     totalUsers: USERS.length,
-//     users: USERS,
-//   });
-// });
-// app.listen(3000, () => {
-//   console.log("Server running on port 3000");
-// });
+app.get("/users", (req, res) => {
+  res.json({
+    success: true,
+    totalUser: USERS.length,
+    user: USERS,
+  });
+});
+app.get("/user/:id", (req, res) => {
+  const number = Number(req.params.id);
+  const user = USERS.find((user) => user.id === number);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "user doesn't exist ",
+    });
+  }
+  res.status(200).json({
+    user,
+    success: true,
+  });
+});
+app.delete("/user/:id", (req, res) => {
+  const userId = Number(req.params.id);
+  const index = USERS.find((user) => user.id === userId);
+  if (!index) {
+    return res.status(404).json({
+      message: "user doesn't exits",
+      success: false,
+    });
+  }
+});
+app.listen(3000, () => {
+  console.log("server is listening to the port 3000");
+});
 
 // import express from "express";
 // import http from "http";
@@ -81,54 +95,56 @@
 //   console.log(`HTTP + WebSocket server running on port ${port}`);
 // });
 
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import http from "http";
-import { Server } from "socket.io";
+// import express from "express";
+// import bodyParser from "body-parser";
+// import cors from "cors";
+// import http from "http";
+// import { Server } from "socket.io";
 
-const app = express();
-const server = http.createServer(app);
+// const app = express();
+// const server = http.createServer(app);
 
-// Express CORS
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+// // Express CORS
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     credentials: true,
+//   })
+// );
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+// });
 
-const emailToSocketMapping = new Map();
+// const emailToSocketMapping = new Map();
+// const socketIdToEmail = new Map();
+// io.on("connection", (socket) => {
+//   console.log("Socket connected:", socket.id);
+//   // socket.on("room:join", (data) => {
+//   //   console.log(data);
+//   // });
+//   socket.on("room:join", (data) => {
+//     const { roomId, emailId } = data;
+//     // console.log("user", emailId, "joined room", roomId);
+//     emailToSocketMapping.set(emailId, socket.id);
+//     socketIdToEmail.set(roomId, emailId);
+//     io.to(socket.id).emit("room:join", data);
+//     socket.join(roomId);
 
-io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
+//     socket.broadcast.to(roomId).emit("user-joined", { emailId });
+//   });
 
-  socket.on("join-room", (data) => {
-    const { roomId, emailId } = data;
+//   socket.on("disconnect", () => {
+//     console.log("Socket disconnected:", socket.id);
+//   });
+// });
 
-    console.log("user", emailId, "joined room", roomId);
-
-    emailToSocketMapping.set(emailId, socket.id);
-    socket.join(roomId);
-
-    socket.broadcast.to(roomId).emit("user-joined", { emailId });
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
-  });
-});
-
-server.listen(8001, () => {
-  console.log("Server running on port 8001");
-});
+// server.listen(8001, () => {
+//   console.log("Server running on port 8001");
+// });

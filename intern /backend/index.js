@@ -87,7 +87,22 @@ app.put("/user/:id/phone", (req, res) => {
       message: "User not found",
     });
   }
+  const phoneExists = USERS.find(
+    (u) => (u.phoneNumber === phoneNumber) & (u.id !== id)
+  );
+  if (phoneExists) {
+    return res.status(409).json({
+      success: false,
+      message: "Phone number already in use",
+    });
+  }
+  user.phoneNumber = phoneNumber;
 
+  res.status(200).json({
+    success: true,
+    message: "Phone number updated successfully",
+    user,
+  });
 });
 app.listen(3000, () => {
   console.log("server is listening to the port 3000");

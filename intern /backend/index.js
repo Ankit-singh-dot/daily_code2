@@ -1,11 +1,12 @@
 import express from "express";
-
+import jwt from "jsonwebtoken";
+const JWT_SECRETS = "supersecret";
 const app = express();
 app.use(express.json());
+const USERS = [];
 app.get("/", (req, res) => {
   res.send("api is working ");
 });
-const USERS = [];
 app.post("/signup", (req, res) => {
   const { fullName, Password, phoneNumber } = req.body;
   if (!fullName || !Password || !phoneNumber) {
@@ -33,6 +34,37 @@ app.post("/signup", (req, res) => {
     success: true,
   });
 });
+
+app.post("/login", (req, res) => {
+  const { phoneNumber, Password } = req.body;
+
+  if (!phoneNumber || !Password) {
+    return res.status(400).json({
+      success: false,
+      message: "phoneNumber and password required",
+    });
+  }
+  const user = USERS.find(
+    (u) => u.phoneNumber === phoneNumber && u.Password == Password
+  );
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials",
+    });
+  }
+  const token = jwt.sign(
+    { id: user.id, phoneNumber: user.phoneNumber },
+    JWT_SECRETS,
+    { expiresIn: "1d" }
+  );
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    token,
+  });
+});
+
 
 app.get("/users", (req, res) => {
   res.json({
@@ -107,6 +139,10 @@ app.put("/user/:id/phone", (req, res) => {
 app.listen(3000, () => {
   console.log("server is listening to the port 3000");
 });
+
+// POST = create something new
+// PUT = update an existing resource (replace)
+// PATCH = update part of an existing resource
 
 // import express from "express";
 // import http from "http";

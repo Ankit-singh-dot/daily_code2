@@ -60,10 +60,34 @@ app.delete("/user/:id", (req, res) => {
   const index = USERS.find((user) => user.id === userId);
   if (!index) {
     return res.status(404).json({
-      message: "user doesn't exits",
+      message: "user not avail to delete",
       success: false,
     });
   }
+  USERS.splice(index, 1);
+  return res.status(200).json({
+    message: "user deleted successfully",
+    success: true,
+  });
+});
+app.put("/user/:id/phone", (req, res) => {
+  const id = Number(req.params.id);
+  const { phoneNumber } = req.params;
+  if (!phoneNumber) {
+    return res.status(400).json({
+      success: false,
+      message: "Phone number is required",
+    });
+  }
+  const user = USERS.find((u) => u.id === id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
 });
 app.listen(3000, () => {
   console.log("server is listening to the port 3000");

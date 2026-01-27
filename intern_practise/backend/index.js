@@ -65,15 +65,35 @@ app.post("/login", (req, res) => {
   });
 });
 
-
-app.get("/users", (req, res) => {
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  console.log(authHeader);
+  if (!authHeader) {
+    return res.status(404).json({
+      success: false,
+      message: "Token missing",
+    });
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decode = jwt.verify(token, JWT_SECRETS);
+    req.user = decode;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+}
+app.get("/users", authMiddleware, (req, res) => {
   res.json({
     success: true,
     totalUser: USERS.length,
     user: USERS,
   });
 });
-app.get("/user/:id", (req, res) => {
+app.get("/user/:id", authMiddleware, (req, res) => {
   const number = Number(req.params.id);
   const user = USERS.find((user) => user.id === number);
   if (!user) {
@@ -87,7 +107,7 @@ app.get("/user/:id", (req, res) => {
     success: true,
   });
 });
-app.delete("/user/:id", (req, res) => {
+app.delete("/user/:id", authMiddleware, (req, res) => {
   const userId = Number(req.params.id);
   const index = USERS.find((user) => user.id === userId);
   if (!index) {
@@ -102,7 +122,7 @@ app.delete("/user/:id", (req, res) => {
     success: true,
   });
 });
-app.put("/user/:id/phone", (req, res) => {
+app.put("/user/:id/phone", authMiddleware, (req, res) => {
   const id = Number(req.params.id);
   const { phoneNumber } = req.params;
   if (!phoneNumber) {

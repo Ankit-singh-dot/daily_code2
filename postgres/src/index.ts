@@ -16,19 +16,20 @@ await pgClient.connect();
 
 app.post("/signup", async (req, res) => {
   const userName = req.body.username;
-  const password = req.body.password;
   const email = req.body.email;
+  const password = req.body.password;
   try {
-    const insertQuery = `INSERT INTO users (name, email , password) VALUES ('${userName}','${password}','${email}');`;
+    const insertQuery = `INSERT INTO users (name, email , password) VALUES ('${userName}','${email}','${password}');`;
 
-    const response = await pgClient.query(insertQuery);
+    // const response = await pgClient.query(insertQuery);
+    console.log(insertQuery);
     res.json({
       message: "you have signed up ",
     });
   } catch (error) {
     res.json({
-        message:"error while making the issue"
-    })
+      message: "error while making the issue",
+    });
   }
 });
 

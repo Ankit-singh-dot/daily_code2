@@ -1,5 +1,7 @@
 import { Client } from "pg";
-("postgresql://neondb_owner:npg_qwINB0sn2gFf@ep-sweet-fire-aiksl86u-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+import express from "express";
+const app = express();
+app.use(express.json());
 const pgClient = new Client({
     user: "neondb_owner",
     password: "npg_qwINB0sn2gFf",
@@ -8,17 +10,24 @@ const pgClient = new Client({
     database: "neondb",
     ssl: true,
 });
-async function main() {
-    await pgClient.connect();
-    //   const response = await pgClient.query(`CREATE TABLE users(
-    //     id SERIAL PRIMARY KEY ,
-    //     name VARCHAR(50),
-    //     email VARCHAR(100) UNIQUE,
-    //     password TEXT
-    //     )`);
-    //   console.log(response);
-    const response2 = await pgClient.query("SELECT * FROM users");
-    console.log(response2.rows);
-}
-main();
+await pgClient.connect();
+app.post("/signup", async (req, res) => {
+    const userName = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    try {
+        const insertQuery = `INSERT INTO users (name, email , password) VALUES ('${userName}','${email}','${password}');`;
+        // const response = await pgClient.query(insertQuery);
+        console.log(insertQuery);
+        res.json({
+            message: "you have signed up ",
+        });
+    }
+    catch (error) {
+        res.json({
+            message: "error while making the issue",
+        });
+    }
+});
+app.listen(3000);
 //# sourceMappingURL=index.js.map

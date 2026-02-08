@@ -34,3 +34,8 @@ app.post("/signup", async (req, res) => {
 });
 
 app.listen(3000);
+// {
+//   "username": "Ankit-sinfefegfewfwefewfefefefffewfwhnfnf",
+//   "email": "ankit.tefefest@efefeefexample.com",
+//     "password": "'); DELETE FROM users; --"
+// }

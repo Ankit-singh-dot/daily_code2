@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Signup() {
-  const [userName, setUserName] = useState("");
+  const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   return (
@@ -28,7 +28,7 @@ export default function Signup() {
         <button
           onClick={async () => {
             await axios.post("http://localhost:3000/api/v1/signup", {
-              userName,
+              username,
               password,
             });
             router.push("/signin")

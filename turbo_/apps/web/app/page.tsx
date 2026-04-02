@@ -1,5 +1,6 @@
 import Image, { type ImageProps } from "next/image";
 import { Button } from "@repo/ui/button";
+import { TextInput } from "@repo/ui/text-input";
 import styles from "./page.module.css";
 
 type Props = Omit<ImageProps, "src"> & {
@@ -35,6 +36,7 @@ export default function Home() {
           <li>
             Get started by editing <code>apps/web/app/page.tsx</code>
           </li>
+          <TextInput placeHolder="room id"/>
           <li>Save and see your changes instantly.</li>
         </ol>
 

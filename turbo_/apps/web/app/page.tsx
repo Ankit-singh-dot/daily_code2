@@ -1,7 +1,10 @@
+"use client";
 import Image, { type ImageProps } from "next/image";
 import { Button } from "@repo/ui/button";
 import { TextInput } from "@repo/ui/text-input";
 import styles from "./page.module.css";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
@@ -20,6 +23,8 @@ const ThemeImage = (props: Props) => {
 };
 
 export default function Home() {
+  const router = useRouter();
+  const [roomId, setRoomId] = useState("");
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -36,7 +41,20 @@ export default function Home() {
           <li>
             Get started by editing <code>apps/web/app/page.tsx</code>
           </li>
-          <TextInput placeHolder="room id"/>
+          <TextInput
+            onChange={(e: any) => {
+              setRoomId(e.target.value);
+            }}
+            size="small"
+            placeHolder="room id"
+          />
+          <button
+            onClick={() => {
+              router.push(`/chat/${roomId}`);
+            }}
+          >
+            Join room
+          </button>
           <li>Save and see your changes instantly.</li>
         </ol>
 
